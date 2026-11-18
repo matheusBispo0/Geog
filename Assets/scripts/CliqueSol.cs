@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class CliqueSol : MonoBehaviour
 {
-    [Header("Animação")]
-    public float tamanhoClique = 1.2f;
-    public float velocidadeAnimacao = 8f;
+    [Header("Configuração do Clique")]
+    public float tamanhoDoClique = 1.25f;
+    public float velocidadeCrescer = 15f;
+    public float velocidadeVoltar = 10f;
 
     private Vector3 tamanhoOriginal;
-    private Coroutine animacaoAtual;
+    private Coroutine animacao;
 
     void Start()
     {
@@ -17,44 +18,51 @@ public class CliqueSol : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (animacaoAtual != null)
+        if (animacao != null)
         {
-            StopCoroutine(animacaoAtual);
+            StopCoroutine(animacao);
         }
 
-        animacaoAtual = StartCoroutine(AnimarClique());
+        animacao = StartCoroutine(AnimacaoClique());
     }
 
-    IEnumerator AnimarClique()
+    IEnumerator AnimacaoClique()
     {
-        Vector3 tamanhoGrande = tamanhoOriginal * tamanhoClique;
+        Vector3 tamanhoMaior = tamanhoOriginal * tamanhoDoClique;
 
         // Cresce
-        while (Vector3.Distance(transform.localScale, tamanhoGrande) > 0.01f)
+        float tempo = 0f;
+
+        while (tempo < 1f)
         {
+            tempo += Time.deltaTime * velocidadeCrescer;
+
             transform.localScale = Vector3.Lerp(
-                transform.localScale,
-                tamanhoGrande,
-                Time.deltaTime * velocidadeAnimacao
+                tamanhoOriginal,
+                tamanhoMaior,
+                tempo
             );
 
             yield return null;
         }
 
-        transform.localScale = tamanhoGrande;
+        // Volta
+        tempo = 0f;
 
-        // Volta ao tamanho original
-        while (Vector3.Distance(transform.localScale, tamanhoOriginal) > 0.01f)
+        while (tempo < 1f)
         {
+            tempo += Time.deltaTime * velocidadeVoltar;
+
             transform.localScale = Vector3.Lerp(
-                transform.localScale,
+                tamanhoMaior,
                 tamanhoOriginal,
-                Time.deltaTime * velocidadeAnimacao
+                tempo
             );
 
             yield return null;
         }
 
         transform.localScale = tamanhoOriginal;
+        animacao = null;
     }
 }
